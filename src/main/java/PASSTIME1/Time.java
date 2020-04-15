@@ -4,6 +4,8 @@
  *
  */
 package PASSTIME1;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -13,13 +15,14 @@ import java.util.Locale;
 public class Time {
     private static final int DATE_FORMAT_WITH_TIME_LENGTH=16;
     private static  Locale usersLocale = Locale.forLanguageTag("pl-PL");
+    private static DateValuesFormater dateValuesFormater;
 
     public static String passed(String from, String to){
         try {
             return getFullTimeToDisplay(from, to);
         }
         catch (DateTimeParseException ex){
-            return ex.getMessage();
+            return "*** "+ex.getMessage();
         }
     }
 
@@ -33,10 +36,16 @@ public class Time {
     private static String displayTimeBetweenTwoDates(String from, String to) {
         LocalDate dateFrom = makeLocalDateFromString(from);
         LocalDate dateTo = makeLocalDateFromString(to);
-        long numbersOfDaysBetween = ChronoUnit.DAYS.between(dateFrom, dateTo);
+        double numbersOfDaysBetween = ChronoUnit.DAYS.between(dateFrom, dateTo);
         double numbersOfWeeksBetween = ChronoUnit.WEEKS.between(dateFrom, dateTo);
+        double numbersOfWeeks = numbersOfDaysBetween/7;
         Period period = Period.between(dateFrom, dateTo);
-        return String.format("\n- mija %d dni, %.2f tygodni\n- kalendarzowo: %d lat %d miesiecy %d dni", numbersOfDaysBetween, numbersOfWeeksBetween, period.getYears(), +period.getMonths(), period.getDays());
+        return String.format("\n- mija: %s, %s \n- kalendarzowo: %s %s %s",
+                dateValuesFormater.getFormatedDayToDisplay((int)numbersOfDaysBetween),
+                dateValuesFormater.getFormatedWeeksToDisplay(numbersOfWeeks),
+                dateValuesFormater.getFormatedYearsFromDate(period.getYears()),
+                dateValuesFormater.getFormatedMonthsFromDate(period.getMonths()),
+                dateValuesFormater.getFormatedDayToDisplay(period.getDays()));
     }
     private static String displayTime(String timeFrom, String timeTo){
         Instant from = Instant.parse(addMiliseconds(timeFrom));
